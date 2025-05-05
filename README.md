@@ -67,33 +67,28 @@ pip install -r requirements.txt
 
 ### **Configuration**
 
-Copy `.flaskenv.example` to `.flaskenv` (if provided) or create a new `.flaskenv` with:\
-\
-&#x20;FLASK\_APP=run.py
+Copy `.flaskenv.example` to `.flaskenv`
 
-FLASK\_ENV=development
-
-FLASK\_RUN\_PORT=5001
-
-SECRET\_KEY=your-secret-key
-
-1.
-
-2. By default, the app uses SQLite at `app/data/data.sqlite`. To change the database, update `SQLALCHEMY_DATABASE_URI` in `config.py`.
-
-
-### **Database Setup**
-
-flask shell
-
-\>>> reset\_db()
-
-\>>> exit
-
+1. Open flask shell
+2. Run 'reset_db()'
+3. By default, the app uses SQLite at `app/data/data.sqlite`. To change the database, update `SQLALCHEMY_DATABASE_URI` in `config.py`.
 
 ### **Running the Application**
 
-flask run --port 5001
+From project root:
+1) Activate your virtualenv
+
+source venv/bin/activate
+2) Export Flask env vars (so Flask knows what to run and that you want debug mode)
+
+export FLASK_APP=run.py
+
+export FLASK_ENV=development
+
+3) Start the server on port 5001
+
+flask run --port=5001
+
 
 Open your browser to `http://localhost:5001`.
 

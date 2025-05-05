@@ -87,6 +87,13 @@ class Sensor(db.Model):
     calibrations = db.relationship('Calibration', backref='sensor', cascade='all, delete-orphan')
     feedbacks = db.relationship('Feedback', backref='sensor', cascade='all, delete-orphan')
 
+    readings = db.relationship(
+        'TemperatureReading',
+        back_populates='sensor',
+        cascade='all, delete-orphan',
+        order_by='TemperatureReading.timestamp'
+    )
+
     def __repr__(self):
         return f'<Sensor {self.name} at {self.location}>'
 
@@ -99,6 +106,16 @@ class Sensor(db.Model):
             self.status = new_status
             sensor_status_subject.notify(self.id, old_status, new_status)
 
+
+class TemperatureReading(db.Model):
+    __tablename__ = 'temperature_readings'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    sensor_id   = db.Column(db.Integer, db.ForeignKey('sensors.id'), nullable=False)
+    timestamp   = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    temperature = db.Column(db.Float, nullable=False)
+
+    sensor = db.relationship('Sensor', back_populates='readings')
 class Calibration(db.Model):
     __tablename__ = 'calibrations'
 

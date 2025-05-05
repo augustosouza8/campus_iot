@@ -5,6 +5,9 @@ HELLO
 """
 
 from urllib.parse import urlparse
+from app.analysis import (summarize_sensors, summarize_feedback, simulate_live_temperatures,
+                          suggest_thermostat_adjustments, aggregate_sensor_features,
+                          get_demo_outdoor_data)
 
 from flask import (
     Blueprint, render_template, redirect,
@@ -16,15 +19,12 @@ from flask_login import (
 )
 
 from app import db
-from app.models import User, Sensor, Calibration, Feedback
+from app.models import User, Sensor, Calibration, Feedback, TemperatureReading
 from app.forms import (
     LoginForm, SensorForm,
     CalibrationForm, FeedbackForm,
     ActionForm
 )
-from app.analysis import summarize_sensors, summarize_feedback  # <-- NEW import
-
-#xdd
 
 bp = Blueprint('main', __name__)
 
@@ -202,20 +202,88 @@ def submit_feedback():
 def admin_dashboard():
     if current_user.role != 'admin':
         abort(403)
-    sensors = db.session.scalars(db.select(Sensor)).all()
+
+    # Fetch data
+    sensors   = db.session.scalars(db.select(Sensor)).all()
     feedbacks = db.session.scalars(db.select(Feedback)).all()
 
-    # Use the new dummy-ML module
-    sensor_summary = summarize_sensors(sensors)
+    # Generate AI-style summaries
+    sensor_summary   = summarize_sensors(sensors)
     feedback_summary = summarize_feedback(feedbacks)
 
+    # Compute sensor counts
+    all_sensors   = sensors
+    online_count  = sum(1 for s in sensors if s.status == 'online')
+    offline_count = sum(1 for s in sensors if s.status == 'offline')
+
+    # Compute overall feedback counts
+    all_feedbacks = feedbacks
+    hot_count     = sum(1 for fb in feedbacks if fb.rating == 'hot')
+    ok_count      = sum(1 for fb in feedbacks if fb.rating == 'ok')
+    cold_count    = sum(1 for fb in feedbacks if fb.rating == 'cold')
+
+    # Compute per-sensor feedback counts for table badges
+    feedback_counts = { s.id: {'hot':0, 'ok':0, 'cold':0} for s in sensors }
+    for fb in feedbacks:
+        if fb.sensor_id in feedback_counts:
+            feedback_counts[fb.sensor_id][fb.rating] += 1
+
+    # Simulate live temperature per sensor
+    live_temps = simulate_live_temperatures(sensors)
+
+    # Use hard‑coded outdoor data
+    outdoor_data = get_demo_outdoor_data()
+    latest_outdoor_temp = outdoor_data[-1].temp if outdoor_data else None
+
+    # Generate thermostat adjustment suggestions
+    thermostat_suggestions = suggest_thermostat_adjustments(
+        sensors,
+        feedbacks,
+        live_temps
+    )
+
+    # Load historical temperature readings (last 2 hours)
+    from datetime import datetime, timedelta
+    cutoff = datetime.utcnow() - timedelta(hours=2)
+    rows = db.session.scalars(
+        db.select(TemperatureReading)
+          .where(TemperatureReading.timestamp >= cutoff)
+    ).all()
+    historical_temps = {}
+    for tr in rows:
+        historical_temps.setdefault(tr.sensor_id, []).append((tr.timestamp, tr.temperature))
+
+    # Build feature vectors for ML/demo
+    feature_vectors = aggregate_sensor_features(
+        sensors=sensors,
+        feedbacks=feedbacks,
+        live_temps=live_temps,
+        historical_temps=historical_temps,
+        outdoor_data=outdoor_data
+    )
+    from app.analysis import ACCEPTABLE_LOW, ACCEPTABLE_HIGH
     return render_template(
         'admin_dashboard.html',
         title='Admin Dashboard',
+        all_sensors=all_sensors,
+        online_count=online_count,
+        offline_count=offline_count,
+        all_feedbacks=all_feedbacks,
+        hot_count=hot_count,
+        ok_count=ok_count,
+        cold_count=cold_count,
+        feedback_counts=feedback_counts,
         sensor_summary=sensor_summary,
-        feedback_summary=feedback_summary
+        feedback_summary=feedback_summary,
+        live_temps=live_temps,
+        thermostat_suggestions=thermostat_suggestions,
+        feature_vectors=feature_vectors,
+        outdoor_data=outdoor_data,
+        latest_outdoor_temp=latest_outdoor_temp,
+        # thresholds for template coloring
+        ACCEPTABLE_LOW=ACCEPTABLE_LOW,
+        ACCEPTABLE_HIGH=ACCEPTABLE_HIGH,
     )
-
 
 @bp.app_errorhandler(403)
 def forbidden(error):
@@ -235,3 +303,18 @@ def too_large(error):
 @bp.app_errorhandler(500)
 def server_error(error):
     return render_template('errors/500.html', title='Server Error'), 500
+
+
+# View to show all feedbacks (admin only)
+@bp.route('/feedbacks', methods=['GET'], endpoint='all_feedbacks')
+@login_required
+def all_feedbacks():
+    if current_user.role != 'admin':
+        abort(403)
+    # Fetch all feedback entries
+    feedbacks = db.session.scalars(db.select(Feedback)).all()
+    return render_template(
+        'all_feedbacks.html',
+        title='All Feedbacks',
+        feedbacks=feedbacks
+    )

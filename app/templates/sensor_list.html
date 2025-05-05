@@ -16,11 +16,7 @@
       <tbody>
         {% for sensor in sensors %}
         <tr>
-          <td>
-            <a href="{{ url_for('main.sensor_detail', id=sensor.id) }}">
-              {{ sensor.name }}
-            </a>
-          </td>
+          <td>{{ sensor.name }}</td>
           <td>{{ sensor.location }}</td>
           <td>{{ sensor.status.capitalize() }}</td>
           <td>
@@ -41,6 +37,11 @@
                 <i class="bi bi-trash"></i>
               </button>
             </form>
+            <a href="{{ url_for('main.sensor_detail', id=sensor.id) }}"
+               class="btn btn-sm btn-outline-info"
+               title="Details">
+              <i class="bi bi-info-circle"></i> details
+            </a>
           </td>
         </tr>
         {% endfor %}

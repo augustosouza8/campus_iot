@@ -2,26 +2,178 @@
 
 {% block content %}
   <h1 class="mt-4">Admin Dashboard</h1>
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header">
-          Sensor Analytics (Dummy AI)
-        </div>
+
+  <div class="row g-4">
+    <!-- Sensor Overview -->
+    <div class="col-md-4">
+      <div class="card text-white bg-primary h-100">
+        <div class="card-header">Sensor Overview</div>
         <div class="card-body">
-          <pre>{{ sensor_summary }}</pre>
+          <h5 class="card-title">Total: {{ all_sensors|length or 0 }}</h5>
+          <p class="card-text">
+            Online: <span class="badge bg-success">{{ online_count or '0' }}</span><br>
+            Offline: <span class="badge bg-danger">{{ offline_count or '0' }}</span>
+          </p>
+          <a href="{{ url_for('main.sensors') }}" class="btn btn-light btn-sm">View All Sensors</a>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header">
-          Feedback Analytics (Dummy AI)
-        </div>
+
+    <!-- Feedback Summary -->
+    <div class="col-md-4">
+      <div class="card text-white bg-success h-100">
+        <div class="card-header">Feedback Summary</div>
         <div class="card-body">
-          <pre>{{ feedback_summary }}</pre>
+          <h5 class="card-title">Total: {{ all_feedbacks|length or 0 }}</h5>
+          <p class="card-text">
+            Hot: <span class="badge bg-danger">{{ hot_count or '0' }}</span><br>
+            OK: <span class="badge bg-warning text-dark">{{ ok_count or '0' }}</span><br>
+            Cold: <span class="badge bg-info text-dark">{{ cold_count or '0' }}</span>
+          </p>
+          <a href="{{ url_for('main.all_feedbacks') }}" class="btn btn-light btn-sm">View Raw Feedback</a>
         </div>
       </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-md-4">
+      <div class="card bg-light h-100">
+        <div class="card-header">Quick Actions</div>
+        <div class="card-body d-flex flex-column">
+          <a href="{{ url_for('main.sensors') }}" class="btn btn-primary mb-2">Add / Manage Sensors</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- AI/ML Model Input (Feature Vectors) -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card border-warning">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>AI/ML Model Input</span>
+          <button class="btn btn-sm btn-outline-warning"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#modelInputCollapse"
+                  aria-expanded="false"
+                  aria-controls="modelInputCollapse">
+            Toggle View
+          </button>
+        </div>
+        <div class="collapse" id="modelInputCollapse">
+          <div class="card-body">
+            <pre style="max-height: 300px; overflow-y: auto;">
+{{ feature_vectors | pprint }}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Live Sensor Data & Suggestions -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">Sensor Live Data & Suggestions</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>Sensor</th>
+                  <th>Location</th>
+                  <th>Live Temp (°C)</th>
+                  <th>Feedback</th>
+                  <th>Suggestion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sensor in all_sensors %}
+                {% set t = live_temps[sensor.id] %}
+                {% set fb = feedback_counts[sensor.id] %}
+                <tr>
+                  <td>{{ sensor.name }}</td>
+                  <td>{{ sensor.location }}</td>
+<td class="
+     {% if t < ACCEPTABLE_LOW %}table-info
+     {% elif t > ACCEPTABLE_HIGH %}table-danger
+     {% else %}table-success{% endif %}
+   ">
+  {{ t or '—' }}°C
+  {% if t is not none and t < ACCEPTABLE_LOW %}
+    <i class="bi bi-thermometer-snow text-info" title="Too cold"></i>
+  {% elif t is not none and t > ACCEPTABLE_HIGH %}
+    <i class="bi bi-thermometer-sun text-danger" title="Too hot"></i>
+  {% endif %}
+</td>
+<td>
+  <div class="d-flex flex-nowrap gap-1">
+    <span class="badge bg-danger">{{ fb.hot }}</span>
+    <span class="badge bg-warning text-dark">{{ fb.ok }}</span>
+    <span class="badge bg-info text-dark">{{ fb.cold }}</span>
+  </div>
+</td>
+                  <td>{{ thermostat_suggestions[sensor.location] or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="5" class="text-center py-4">No sensors available</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Current Outdoor Temperature -->
+  <div class="row mt-3">
+    <div class="col-md-4">
+      <div class="card text-white bg-info">
+        <div class="card-header">Outdoor Temp</div>
+        <div class="card-body">
+          <h5 class="card-title">
+            {{ latest_outdoor_temp is not none
+               and (latest_outdoor_temp ~ '°C')
+               or 'N/A' }}
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <h3>Recent Activity</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- TODO: loop over real activity logs once available -->
+          <tr>
+            <td>2025-05-05 10:20</td>
+            <td><span class="badge bg-success">Feedback</span></td>
+            <td>Student1 rated Sensor A1 as <strong>OK</strong></td>
+          </tr>
+          <tr>
+            <td>2025-05-05 09:45</td>
+            <td><span class="badge bg-danger">Status Change</span></td>
+            <td>Sensor B2 changed to <strong>Offline</strong></td>
+          </tr>
+          <tr>
+            <td>2025-05-05 08:30</td>
+            <td><span class="badge bg-info">Calibration</span></td>
+            <td>Calibration recorded for Sensor A1</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 {% endblock %}

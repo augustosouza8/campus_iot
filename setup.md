@@ -55,5 +55,3 @@ Once pasted, commit it:
 git add SETUP.md
 git commit -m "Add setup guide"
 git push
-
-Let me know if you’d like a version formatted for VS Code or team onboarding docs.
