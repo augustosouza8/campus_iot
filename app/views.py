@@ -20,25 +20,20 @@ from app.forms import (
     CalibrationForm, FeedbackForm,
     ActionForm
 )
+from app.analysis import summarize_sensors, summarize_feedback  # <-- NEW import
 
-# Define a blueprint named “main”
 bp = Blueprint('main', __name__)
 
 
 @bp.route('/', endpoint='home')
 def home():
-    """Public home page."""
     return render_template('home.html', title='Home')
 
 
 @bp.route('/login', methods=['GET', 'POST'], endpoint='login')
 def login_view():
-    """
-    Handle login for both admins and students.
-    """
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(
@@ -47,34 +42,27 @@ def login_view():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password', 'danger')
             return redirect(url_for('main.login'))
-
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('main.home')
         return redirect(next_page)
-
     return render_template('generic_form.html', title='Sign In', form=form)
 
 
 @bp.route('/logout', endpoint='logout')
 def logout_view():
-    """Log out the current user."""
     logout_user()
     return redirect(url_for('main.home'))
 
-
-# -- Admin‐only sensor management --------------------------------------------
 
 @bp.route('/sensors', methods=['GET', 'POST'], endpoint='sensors')
 @login_required
 def sensors():
     if current_user.role != 'admin':
         abort(403)
-
     sensor_form = SensorForm()
     action_form = ActionForm()
-
     if sensor_form.validate_on_submit():
         new_sensor = Sensor(
             name=sensor_form.name.data,
@@ -85,7 +73,6 @@ def sensors():
         db.session.commit()
         flash('Sensor added successfully.', 'success')
         return redirect(url_for('main.sensors'))
-
     all_sensors = db.session.scalars(db.select(Sensor)).all()
     return render_template(
         'sensor_list.html',
@@ -101,14 +88,11 @@ def sensors():
 def sensor_detail(id):
     if current_user.role != 'admin':
         abort(403)
-
     sensor = db.session.get(Sensor, id)
     if sensor is None:
         return redirect(url_for('main.sensors'))
-
     calibration_form = CalibrationForm()
     calibration_form.sensor_id.data = sensor.id
-
     return render_template(
         'sensor_detail.html',
         title=f'Sensor {sensor.name}',
@@ -122,7 +106,6 @@ def sensor_detail(id):
 def remove_sensor():
     if current_user.role != 'admin':
         abort(403)
-
     form = ActionForm()
     if form.validate_on_submit():
         sensor = db.session.get(Sensor, int(form.record_id.data))
@@ -138,7 +121,6 @@ def remove_sensor():
 def calibrate_sensor():
     if current_user.role != 'admin':
         abort(403)
-
     form = CalibrationForm()
     if form.validate_on_submit():
         cal = Calibration(
@@ -151,25 +133,16 @@ def calibrate_sensor():
     return redirect(url_for('main.sensor_detail', id=form.sensor_id.data))
 
 
-# -- Student feedback -------------------------------------------------------
-
 @bp.route('/student', methods=['GET'], endpoint='student_dashboard')
 @login_required
 def student_dashboard():
-    """
-    Landing page for students.
-    Instantiates and passes feedback_form to the template so it never is undefined.
-    """
     if current_user.role != 'student':
         abort(403)
-
-    # Create the form and populate sensor choices
     form = FeedbackForm()
     form.sensor_id.choices = [
         (s.id, f"{s.name} ({s.location})")
         for s in db.session.scalars(db.select(Sensor)).all()
     ]
-
     return render_template(
         'student_feedback.html',
         title='Feedback',
@@ -180,18 +153,13 @@ def student_dashboard():
 @bp.route('/feedback', methods=['GET', 'POST'], endpoint='submit_feedback')
 @login_required
 def submit_feedback():
-    """
-    Show feedback form (GET) and process it (POST).
-    """
     if current_user.role != 'student':
         abort(403)
-
     form = FeedbackForm()
     form.sensor_id.choices = [
         (s.id, f"{s.name} ({s.location})")
         for s in db.session.scalars(db.select(Sensor)).all()
     ]
-
     if form.validate_on_submit():
         fb = Feedback(
             user_id=current_user.id,
@@ -203,7 +171,6 @@ def submit_feedback():
         db.session.commit()
         flash('Thank you for your feedback!', 'success')
         return redirect(url_for('main.student_dashboard'))
-
     return render_template(
         'student_feedback.html',
         title='Submit Feedback',
@@ -211,28 +178,17 @@ def submit_feedback():
     )
 
 
-# -- Admin analytics --------------------------------------------------------
-
 @bp.route('/admin', methods=['GET'], endpoint='admin_dashboard')
 @login_required
 def admin_dashboard():
     if current_user.role != 'admin':
         abort(403)
-
     sensors = db.session.scalars(db.select(Sensor)).all()
     feedbacks = db.session.scalars(db.select(Feedback)).all()
 
-    sensor_summary = (
-        f"Total sensors: {len(sensors)}; "
-        f"Online: {sum(s.status=='online' for s in sensors)}; "
-        f"Offline: {sum(s.status=='offline' for s in sensors)}"
-    )
-    feedback_summary = (
-        f"Total feedbacks: {len(feedbacks)}; "
-        f"Hot: {sum(fb.rating=='hot' for fb in feedbacks)}; "
-        f"OK: {sum(fb.rating=='ok' for fb in feedbacks)}; "
-        f"Cold: {sum(fb.rating=='cold' for fb in feedbacks)}"
-    )
+    # Use the new dummy-ML module
+    sensor_summary = summarize_sensors(sensors)
+    feedback_summary = summarize_feedback(feedbacks)
 
     return render_template(
         'admin_dashboard.html',
@@ -241,8 +197,6 @@ def admin_dashboard():
         feedback_summary=feedback_summary
     )
 
-
-# -- Error handlers ---------------------------------------------------------
 
 @bp.app_errorhandler(403)
 def forbidden(error):

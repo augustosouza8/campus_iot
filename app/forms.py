@@ -2,13 +2,13 @@
 Flask-WTF form definitions for Campus IoT Management.
 """
 
-from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, PasswordField, BooleanField,
     SubmitField, HiddenField, TextAreaField, SelectField
 )
 from wtforms.validators import DataRequired, Length, Optional
+
 
 class LoginForm(FlaskForm):
     """Used on /login to authenticate both admins and students."""
@@ -74,7 +74,10 @@ class FeedbackForm(FlaskForm):
 class ActionForm(FlaskForm):
     """
     Generic hidden-field form for actions like removing a sensor or calibrating.
-    We’ll pass record IDs in the hidden field.
+    CSRF disabled to allow simple POST from multiple forms on the same page.
     """
+    class Meta:
+        csrf = False
+
     record_id = HiddenField(validators=[DataRequired()])
     submit = SubmitField('Go')
