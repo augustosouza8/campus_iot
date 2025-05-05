@@ -1,7 +1,7 @@
 """
 Route handlers for the Campus IoT Management System.
 
-HELLO
+HELLOooo
 """
 
 from urllib.parse import urlparse
