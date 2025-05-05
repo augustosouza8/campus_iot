@@ -1,5 +1,5 @@
 """
-Application factory and extension initialization for Campus IoT app.
+Application factory and extension initialization for Campus IoT app. Hello
 """
 
 from flask import Flask
