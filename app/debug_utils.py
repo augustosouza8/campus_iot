@@ -1,34 +1,34 @@
 """
-Development utilities: reset the database schema and seed with sample data.
+Development utilities: reset and seed the database with sample data.
 """
 
 from app import db
-from app.models import User, Sensor, Calibration, Feedback
+from app.models import Admin, Student, Sensor, Calibration, Feedback
 
 
 def reset_db():
     """
-    Drop all tables, recreate them, and insert sample admin/student users,
-    a handful of sensors, calibrations, and feedback entries.
+    Drop all tables, recreate schema, and seed with sample users, sensors,
+    calibrations, and feedback entries.
     """
     # DROP & CREATE
-    db.drop_all()   # remove existing schema
-    db.create_all()  # create tables per models.py
+    db.drop_all()
+    db.create_all()
 
     # --- Seed Users ---
     admins = [
-        User(username='admin1', email='admin1@campus.edu', role='admin'),
-        User(username='admin2', email='admin2@campus.edu', role='admin'),
+        Admin(username='admin1', email='admin1@campus.edu'),
+        Admin(username='admin2', email='admin2@campus.edu'),
     ]
     students = [
-        User(username='student1', email='s1@campus.edu', role='student'),
-        User(username='student2', email='s2@campus.edu', role='student'),
+        Student(username='student1', email='s1@campus.edu'),
+        Student(username='student2', email='s2@campus.edu'),
     ]
-    # Set simple passwords for testing
     for u in admins + students:
-        u.set_password('password123')  # hashtag: same test password
+        u.set_password('password123')
 
     db.session.add_all(admins + students)
+    db.session.commit()
 
     # --- Seed Sensors ---
     sensors = [
@@ -37,8 +37,6 @@ def reset_db():
         Sensor(name='Sensor C3', location='Building 3 - Room 303', status='online'),
     ]
     db.session.add_all(sensors)
-
-    # Commit to assign IDs
     db.session.commit()
 
     # --- Seed Calibrations ---
@@ -54,7 +52,5 @@ def reset_db():
         Feedback(user_id=students[1].id, sensor_id=sensors[1].id, rating='hot', comment='Too warm today'),
     ]
     db.session.add_all(feedbacks)
-
-    # Final commit to save calibrations & feedbacks
     db.session.commit()
     print("Database reset and seeded with sample data.")
