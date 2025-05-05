@@ -24,10 +24,18 @@
           <td>{{ sensor.location }}</td>
           <td>{{ sensor.status.capitalize() }}</td>
           <td>
+            <form action="{{ url_for('main.toggle_sensor_status') }}"
+                  method="post"
+                  style="display:inline">
+              {{ action_form.record_id(value=sensor.id) }}
+              <button class="btn btn-sm btn-outline-secondary" type="submit"
+                      title="Toggle Status">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+            </form>
             <form action="{{ url_for('main.remove_sensor') }}"
                   method="post"
                   style="display:inline">
-              {# Only include the record_id hidden field #}
               {{ action_form.record_id(value=sensor.id) }}
               <button class="btn btn-sm btn-outline-danger" type="submit">
                 <i class="bi bi-trash"></i>

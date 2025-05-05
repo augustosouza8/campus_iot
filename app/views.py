@@ -119,6 +119,20 @@ def remove_sensor():
             flash('Sensor removed.', 'warning')
     return redirect(url_for('main.sensors'))
 
+@bp.route('/sensors/toggle_status', methods=['POST'], endpoint='toggle_sensor_status')
+@login_required
+def toggle_sensor_status():
+    if current_user.role != 'admin':
+        abort(403)
+    form = ActionForm()
+    if form.validate_on_submit():
+        sensor = db.session.get(Sensor, int(form.record_id.data))
+        if sensor:
+            sensor.status = 'offline' if sensor.status == 'online' else 'online'
+            db.session.commit()
+            flash(f'Sensor status changed to {sensor.status}.', 'info')
+    return redirect(url_for('main.sensors'))
+
 
 @bp.route('/sensors/calibrate', methods=['POST'], endpoint='calibrate_sensor')
 @login_required
