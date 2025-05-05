@@ -129,7 +129,7 @@ def toggle_sensor_status():
         sensor = db.session.get(Sensor, int(form.record_id.data))
         if sensor:
             sensor.status = 'offline' if sensor.status == 'online' else 'online'
-            sensor.set_status(new_status)
+            sensor.set_status(new_status=sensor.status)
             db.session.commit()
             flash(f'Sensor status changed to {sensor.status}.', 'info')
     return redirect(url_for('main.sensors'))
