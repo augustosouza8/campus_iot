@@ -22,6 +22,8 @@ from app.forms import (
 )
 from app.analysis import summarize_sensors, summarize_feedback  # <-- NEW import
 
+#xdd
+
 bp = Blueprint('main', __name__)
 
 
