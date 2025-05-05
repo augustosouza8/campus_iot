@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login  # import the db and login extensions
 
+from app.observer import sensor_status_subject
+
 
 class User(UserMixin, db.Model):
     """
@@ -64,6 +66,14 @@ class Sensor(db.Model):
     def __repr__(self):
         return f'<Sensor {self.name} at {self.location}>'
 
+    def set_status(self, new_status: str):
+        """
+        Set the sensor status and notify observers of the change.
+        """
+        if self.status != new_status:
+            old_status = self.status
+            self.status = new_status
+            sensor_status_subject.notify(self.id, old_status, new_status)
 
 class Calibration(db.Model):
     """
