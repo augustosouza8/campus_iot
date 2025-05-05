@@ -46,7 +46,17 @@ def create_app():
             'reset_db': reset_db
         }
 
-    # Import routes and error handlers so they’re registered
-    from app import views  # noqa: E402
+
+
+    # # Import routes and error handlers so they’re registered
+    # from app import views  # noqa: E402
+    #
+    # return app
+
+
+    # Import and register our view‐blueprint
+    from app.views import bp as main_bp  # blueprint defined below
+    app.register_blueprint(main_bp)
 
     return app
+

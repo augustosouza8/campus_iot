@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Submit Room Temperature Feedback</h1>
+<div class="col-lg-6">
+  {% import "bootstrap_wtf.html" as wtf %}
+  {{ wtf.quick_form(feedback_form) }}
+</div>
+{% endblock %}
