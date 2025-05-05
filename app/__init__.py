@@ -55,8 +55,7 @@ def create_app():
 
 
     # Import and register our view‐blueprint
-    from app.views import bp as main_bp # blueprint defined below
-    from app import observer
+    from app.views import bp as main_bp  # blueprint defined below
     app.register_blueprint(main_bp)
 
     return app
