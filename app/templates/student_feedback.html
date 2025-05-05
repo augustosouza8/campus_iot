@@ -1,9 +1,13 @@
+<!-- app/templates/student_feedback.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Submit Room Temperature Feedback</h1>
-<div class="col-lg-6">
-  {% import "bootstrap_wtf.html" as wtf %}
-  {{ wtf.quick_form(feedback_form) }}
-</div>
+  <h1 class="mt-4">Submit Room Temperature Feedback</h1>
+  <div class="col-lg-6">
+    {% import "bootstrap_wtf.html" as wtf %}
+    {{ wtf.quick_form(
+         feedback_form,
+         action=url_for('main.submit_feedback')
+    ) }}
+  </div>
 {% endblock %}

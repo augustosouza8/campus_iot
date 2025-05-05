@@ -1,23 +1,28 @@
+<!-- app/templates/sensor_detail.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Sensor: {{ sensor.name }}</h1>
-<div class="col-lg-8">
-  <h4>Location: {{ sensor.location }}</h4>
-  <h4>Status: {{ sensor.status.capitalize() }}</h4>
+  <h1 class="mt-4">Sensor: {{ sensor.name }}</h1>
+  <div class="col-lg-8">
+    <p><strong>Location:</strong> {{ sensor.location }}</p>
+    <p><strong>Status:</strong> {{ sensor.status.capitalize() }}</p>
+    <hr>
 
-  <hr>
-  <!-- Calibration history -->
-  <h3>Calibration Events</h3>
-  <ul>
-    {% for cal in sensor.calibrations %}
-    <li>{{ cal.calibrated_at.strftime('%Y-%m-%d %H:%M') }} — {{ cal.notes or 'No notes' }}</li>
-    {% endfor %}
-  </ul>
+    <h3>Calibration Events</h3>
+    <ul>
+      {% for cal in sensor.calibrations %}
+        <li>
+          {{ cal.calibrated_at.strftime('%Y-%m-%d %H:%M') }}
+          — {{ cal.notes or 'No notes' }}
+        </li>
+      {% endfor %}
+    </ul>
 
-  <!-- Calibrate this sensor -->
-  <h4>Record Calibration</h4>
-  {% import "bootstrap_wtf.html" as wtf %}
-  {{ wtf.quick_form(calibration_form, action=url_for('calibrate_sensor')) }}
-</div>
+    <h4 class="mt-4">Record Calibration</h4>
+    {% import "bootstrap_wtf.html" as wtf %}
+    {{ wtf.quick_form(
+         calibration_form,
+         action=url_for('main.calibrate_sensor')
+       ) }}
+  </div>
 {% endblock %}

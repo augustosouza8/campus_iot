@@ -1,41 +1,44 @@
+<!-- app/templates/sensor_list.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Campus Sensors</h1>
-<div class="col-lg-8">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    {% for sensor in sensors %}
-    <tr>
-      <td class="text-start text-nowrap">
-        <a href="{{ url_for('sensor_detail', id=sensor.id) }}">{{ sensor.name }}</a>
-      </td>
-      <td>{{ sensor.location }}</td>
-      <td>{{ sensor.status.capitalize() }}</td>
-      <td>
-        <!-- Hidden‐field pattern for remove -->
-        <form action="{{ url_for('remove_sensor') }}" method="post" style="display:inline">
-          {{ action_form.hidden_tag() }}
-          {{ action_form.record_id(value=sensor.id) }}
-          <button class="btn btn-sm btn-outline-danger" type="submit">
-            <i class="bi bi-trash"></i>
-          </button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <h1 class="mt-4">Campus Sensors</h1>
+  <div class="col-lg-8">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sensor in sensors %}
+        <tr>
+          <td>
+            <a href="{{ url_for('main.sensor_detail', id=sensor.id) }}">
+              {{ sensor.name }}
+            </a>
+          </td>
+          <td>{{ sensor.location }}</td>
+          <td>{{ sensor.status.capitalize() }}</td>
+          <td>
+            <form action="{{ url_for('main.remove_sensor') }}" method="post" style="display:inline">
+              {{ action_form.hidden_tag() }}
+              {{ action_form.record_id(value=sensor.id) }}
+              <button class="btn btn-sm btn-outline-danger" type="submit">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-  <!-- Connect new sensor -->
-  <h3>Add New Sensor</h3>
-  {% import "bootstrap_wtf.html" as wtf %}
-  {{ wtf.quick_form(sensor_form) }}
-</div>
+    <h3 class="mt-4">Add New Sensor</h3>
+    {% import "bootstrap_wtf.html" as wtf %}
+    {{ wtf.quick_form(sensor_form) }}
+  </div>
 {% endblock %}
