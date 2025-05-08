@@ -32,9 +32,9 @@ Campus IoT is a Flask-based web application for managing and monitoring IoT sens
 
   - **Dependency Injection**: Flask extensions (`db`, `login`) initialized in the factory function.
 
-- **Design Patterns**:
+- **Design Pattern**:
 
-  - To be implemented in future iterations: Adapter, Observer (Publish/Subscribe), Decorator.
+  - Observer design pattern added to notify the dashboard of the sensor status changes.
 
 - **Class Relationships**:
 

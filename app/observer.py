@@ -1,12 +1,11 @@
 """
 Observer pattern implementation for sensor status changes.
 """
-from typing import List, Callable
+
+from typing import List
+from datetime import datetime
 
 class SensorStatusObserver:
-    """
-    Observer interface that concrete observers must implement.
-    """
     def update(self, sensor_id: int, old_status: str, new_status: str):
         """
         Called when a sensor's status changes.
@@ -43,3 +42,35 @@ class SensorStatusSubject:
 
 # Global subject instance to be used throughout the application
 sensor_status_subject = SensorStatusSubject()
+
+
+# -----------------------
+# Dashboard notification
+# -----------------------
+
+# internal storage for dashboard events
+_dashboard_notifications: List[dict] = []
+
+class DashboardObserver(SensorStatusObserver):
+    """
+    Records each status change into an in-memory list for the dashboard.
+    """
+    def update(self, sensor_id: int, old_status: str, new_status: str):
+        _dashboard_notifications.append({
+            'sensor_id':   sensor_id,
+            'old_status':  old_status,
+            'new_status':  new_status,
+            'timestamp':   datetime.utcnow()
+        })
+
+# attach our dashboard observer so it receives every update
+_dashboard_observer = DashboardObserver()
+sensor_status_subject.attach(_dashboard_observer)
+
+
+def get_dashboard_notifications() -> List[dict]:
+    """
+    Return a copy of all recorded status-change notifications.
+    Each dict has keys: sensor_id, old_status, new_status, timestamp.
+    """
+    return list(_dashboard_notifications)
