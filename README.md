@@ -2,7 +2,14 @@
 
 ## **Overview**
 
-Campus IoT is a Flask-based web application for managing and monitoring IoT sensors across campus rooms. Students can submit temperature feedback, and administrators can add, remove, and calibrate sensors, as well as view analytics based on sensor status and feedback.
+Campus IoT is a Flask-based web application for combating energy wastage on campus through smart setting of heating systems based on  IoT sensor data and human input. Students can submit temperature feedback, and administrators can add, remove, and calibrate sensors, as well as view analytics based on sensor status and feedback. Data is collected and aggregated in a dataclass containing vectors that would be outputted to an AI/ML system which tailors suggestions to decrease heating waste. Current implementation of this feature is simplistic but core functionality and interfaces are established.
+
+## **Contributions**
+- Augusto Souza - 20% - Database, classes, forms
+- Frederick Dobbin - 20% - Demo video, design principles, plan test cases & core features
+- Algot Norlin - 20% - Sensors, feedback, models
+- Harry Sadleir - 20% - Admin dashboard, AI/ML, setup instructions (github: woofdog7777)
+- Harry Thomas - 20% - Observers, implement test cases, readme
 
 
 ## **Features**
@@ -13,13 +20,14 @@ Campus IoT is a Flask-based web application for managing and monitoring IoT sens
 
 - **Student Feedback**: Students submit temperature ratings (`hot`, `ok`, `cold`) with optional comments.
 
-- **Admin Dashboard**: Dummy AI summaries of sensor statuses and feedback distributions.
+- **Admin Dashboard**: Summaries of sensor statuses and feedback distributions, simple sensor-data and feedback based suggestions (AI/ML interface built and ready for integration).
 
 - **Database Seeding**: `reset_db()` utility to drop, recreate, and seed the database with sample data for development.
 
 - **Testing**: Testcases can be found withing the 'tests' directory.
 
 ## **Design & Architecture**
+- **Languages Used**: Python, HTML, CSS
 
 - **Application Factory Pattern**: Central `create_app()` in `app/__init__.py` for flexible configuration and testing.
 
@@ -45,6 +53,15 @@ Campus IoT is a Flask-based web application for managing and monitoring IoT sens
 
 
 ## **Getting Started**
+
+Login details:
+
+Student Username: student1
+Admin Username: admin1
+
+All passwords: password123
+
+Database is included for ease of testing.
 
 # Project Setup Guide
 
@@ -86,7 +103,7 @@ pip install -r requirements.txt
 
 ⸻
 
-5. (Optional) Set interpreter in PyCharm
+5. (Optional - If using PyCharm GUI) Set interpreter in PyCharm
 	1.	Open the project in PyCharm.
 	2.	Go to Settings > Project > Python Interpreter
 	3.	Click the gear icon (⚙️) → Add…
@@ -95,8 +112,9 @@ pip install -r requirements.txt
 	•	venv/bin/python (on macOS/Linux)
 	•	venv\Scripts\python.exe (on Windows)
 
-✅ PyCharm will now use your virtual environment.
+PyCharm will now use your virtual environment.
 
+6. Open Project in pycharm, go to Run > Edit configurations > Python > set module to 'flask' > set script parameters to 'run'
 
 
 ### **Running the Application**
@@ -108,8 +126,11 @@ source venv/bin/activate
 2) Rename .flaskenv.example to .flaskenv or create a new .flaskenv with the following text:
 
 FLASK_APP=run.py
+
 FLASK_ENV=development
+
 FLASK_DEBUG=1
+
 FLASK_RUN_PORT=5001
 
 Open your browser to `http://localhost:5001`.
