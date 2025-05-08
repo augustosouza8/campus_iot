@@ -95,8 +95,6 @@ Open your browser to `http://localhost:5001`.
 
 ## **Testing**
 
-_(To be added)_
-
 We aim to include unit and integration tests using `pytest` and Flask’s test client. Example setup:
 
 pip install pytest pytest-flask
