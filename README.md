@@ -148,8 +148,3 @@ Open your browser to `http://localhost:5001`.
 - Migrate to PostgreSQL or another production-grade database.
 
 - Enhance UI/UX with a more polished Bootstrap theme and client-side validation, accessibility features.
-
-
-## **License**
-
-This project is licensed under the MIT License. See the[ LICENSE](https://chatgpt.com/c/LICENSE) file for details..
