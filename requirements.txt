@@ -5,3 +5,4 @@ flask-wtf
 email_validator
 python-dotenv
 werkzeug
+pytest

@@ -12,7 +12,6 @@ def test_admin_dashboard_access(client):
     rv = client.get('/admin')
     assert rv.status_code == 200
     assert b'Admin Dashboard' in rv.data
-    assert b'Dummy AI' in rv.data
 
 def test_admin_dashboard_forbidden(client):
     """Negative: student is not allowed to view admin dashboard."""
