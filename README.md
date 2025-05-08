@@ -17,6 +17,7 @@ Campus IoT is a Flask-based web application for managing and monitoring IoT sens
 
 - **Database Seeding**: `reset_db()` utility to drop, recreate, and seed the database with sample data for development.
 
+- **Testing**: Testcases can be found withing the 'tests' directory.
 
 ## **Design & Architecture**
 
@@ -45,33 +46,58 @@ Campus IoT is a Flask-based web application for managing and monitoring IoT sens
 
 ## **Getting Started**
 
-### **Prerequisites**
+# Project Setup Guide
 
-- Python 3.8 or higher
+This guide walks you through setting up the project using a Python virtual environment.
 
-- `virtualenv` (recommended)
+---
+## 1. Clone the repository
 
 
-### **Installation**
+git clone git@github.com:augustosouza8/campus_iot.git
+cd campus_iot
 
-git clone https\://github.com/augustosouza8/campus\_iot.git
+⸻
+2. Create a virtual environment
 
-cd campus\_iot
+python3 -m venv venv
 
-python -m venv venv
+⸻
+3. Activate the virtual environment
 
-source venv/bin/activate  # On Windows: venv\\\Scripts\\\activate
+macOS/Linux:
+
+source venv/bin/activate
+
+Windows (CMD):
+
+venv\Scripts\activate
+
+Windows (PowerShell):
+
+.\venv\Scripts\Activate.ps1
+⸻
+
+4. Install dependencies
 
 pip install -r requirements.txt
 
 
-### **Configuration**
 
-Copy `.flaskenv.example` to `.flaskenv`
+⸻
 
-1. Open flask shell
-2. Run 'reset_db()'
-3. By default, the app uses SQLite at `app/data/data.sqlite`. To change the database, update `SQLALCHEMY_DATABASE_URI` in `config.py`.
+5. (Optional) Set interpreter in PyCharm
+	1.	Open the project in PyCharm.
+	2.	Go to Settings > Project > Python Interpreter
+	3.	Click the gear icon (⚙️) → Add…
+	4.	Choose “Existing environment”
+	5.	Select:
+	•	venv/bin/python (on macOS/Linux)
+	•	venv\Scripts\python.exe (on Windows)
+
+✅ PyCharm will now use your virtual environment.
+
+
 
 ### **Running the Application**
 
@@ -79,40 +105,28 @@ From project root:
 1) Activate your virtualenv
 
 source venv/bin/activate
-2) Export Flask env vars (so Flask knows what to run and that you want debug mode)
+2) Rename .flaskenv.example to .flaskenv or create a new .flaskenv with the following text:
 
-export FLASK_APP=run.py
-
-export FLASK_ENV=development
-
-3) Start the server on port 5001
-
-flask run --port=5001
-
+FLASK_APP=run.py
+FLASK_ENV=development
+FLASK_DEBUG=1
+FLASK_RUN_PORT=5001
 
 Open your browser to `http://localhost:5001`.
 
 
-## **Testing**
 
-We aim to include unit and integration tests using `pytest` and Flask’s test client. Example setup:
-
-pip install pytest pytest-flask
-
-pytest
 
 
 ## **Future Work**
 
-- Implement real analytics and interactive charts in the admin dashboard.
+- Implement real analytics based on vectors gathered (visible on the admin dashboard).
 
 - Integrate with external sensor APIs using the Adapter pattern.
 
-- Add comprehensive unit and negative test cases for each feature.
-
 - Migrate to PostgreSQL or another production-grade database.
 
-- Enhance UI/UX with a more polished Bootstrap theme and client-side validation.
+- Enhance UI/UX with a more polished Bootstrap theme and client-side validation, accessibility features.
 
 
 ## **License**
